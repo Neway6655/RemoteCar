@@ -1,6 +1,13 @@
 import msvcrt
 import time
 import serial
+import logging
+
+FORMAT = '%(asctime)-15s %(message)s'
+logging.basicConfig(format=FORMAT)
+
+logger = logging.getLogger('keyboard.listener')
+logger.setLevel(logging.INFO)
 
 def kbfunc():
     #this is boolean for whether the keyboard has bene hit
@@ -27,16 +34,16 @@ def main():
             time.sleep(0.5)
         elif x.decode() == 'w':
             print ("Forward.")
-            ser.write("f")
+            ser.write("1")
         elif x.decode() == 's':
             print ("Backward.")
-            ser.write("b")
+            ser.write("2")
         elif x.decode() == 'a':
             print ("Turn left.")
-            ser.write("l")
+            ser.write("3")
         elif x.decode() == 'd':
             print ("Turn right.")
-            ser.write("r")
+            ser.write("4")
         elif x.decode() == 'q':
             print ("Quit.")
             break;
@@ -44,3 +51,7 @@ def main():
             time.sleep(0.5)
 
     ser.close
+
+
+if __name__ == "__main__":
+    main()
