@@ -22,24 +22,23 @@ Adafruit_CC3000 cc3000 = Adafruit_CC3000(ADAFRUIT_CC3000_CS, ADAFRUIT_CC3000_IRQ
 
 #define LISTEN_PORT           18001    // What TCP port to listen on for connections.  The echo protocol uses port 7.
 
-Adafruit_CC3000_Server echoServer(LISTEN_PORT);
+Adafruit_CC3000_Server carServer(LISTEN_PORT);
 
 // DC motor on M1
 AF_DCMotor motor1(1, MOTOR12_1KHZ);
 AF_DCMotor motor2(2, MOTOR12_1KHZ);
 
-int inByte;
-// initial speed
-int speed = 200;
+int fastSpeed = 120;
+int slowSpeed = 80;
 
 void setup(void)
 {
   Serial.begin(9600);
   
-  motor1.setSpeed(speed);
-  motor2.setSpeed(speed);
+  motor1.setSpeed(fastSpeed);
+  motor2.setSpeed(fastSpeed);
   motor1.run(RELEASE);
-  motor2.run(RELEASE);
+  motor2.run(RELEASE); 
   
   Serial.println(F("Hello, CC3000!\n")); 
 
@@ -70,38 +69,35 @@ void setup(void)
   while (! displayConnectionDetails()) {
     delay(1000);
   }
-
-  /*********************************************************/
-  /* You can safely remove this to save some flash memory! */
-  /*********************************************************/
-  Serial.println(F("\r\nNOTE: This sketch may cause problems with other sketches"));
-  Serial.println(F("since the .disconnect() function is never called, so the"));
-  Serial.println(F("AP may refuse connection requests from the CC3000 until a"));
-  Serial.println(F("timeout period passes.  This is normal behaviour since"));
-  Serial.println(F("there isn't an obvious moment to disconnect with a server.\r\n"));
   
   // Start listening for connections
-  echoServer.begin();
+  carServer.begin();
   
   Serial.println(F("Listening for connections..."));
 }
 
-void accelerate() { 
+void accelerate() {
+  motor1.setSpeed(fastSpeed);
+  motor2.setSpeed(fastSpeed);
   motor1.run(FORWARD);
   motor2.run(FORWARD);
 }
 
 void decelerate() {
+  motor1.setSpeed(slowSpeed);
+  motor2.setSpeed(slowSpeed);
   motor1.run(BACKWARD);
   motor2.run(BACKWARD);
 }
 
 void turnLeft() {
+  motor1.setSpeed(slowSpeed);
   motor1.run(FORWARD);
   motor2.run(RELEASE);
 }
 
 void turnRight(){
+  motor2.setSpeed(slowSpeed);
   motor1.run(RELEASE);
   motor2.run(FORWARD);
 }
@@ -116,7 +112,7 @@ char buffer[16];
 void loop(void)
 {
   // Try to get a client which is connected.
-  Adafruit_CC3000_ClientRef client = echoServer.available();
+  Adafruit_CC3000_ClientRef client = carServer.available();
   if (client) {
      // Check if there is data available to read.
      if (client.available() > 0) {
@@ -124,7 +120,7 @@ void loop(void)
        // Read.
        int n = client.read(buffer, 15, 1);
        if (n < 0){
-//         Serial.println(F("Error data received..."));
+         Serial.println(F("Error data received..."));
        }
        client.write(buffer,15,1);
        Serial.println(buffer);
