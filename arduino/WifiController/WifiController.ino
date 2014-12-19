@@ -20,7 +20,7 @@ Adafruit_CC3000 cc3000 = Adafruit_CC3000(ADAFRUIT_CC3000_CS, ADAFRUIT_CC3000_IRQ
 // Security can be WLAN_SEC_UNSEC, WLAN_SEC_WEP, WLAN_SEC_WPA or WLAN_SEC_WPA2
 #define WLAN_SECURITY   WLAN_SEC_WPA2
 
-#define LISTEN_PORT           7000    // What TCP port to listen on for connections.  The echo protocol uses port 7.
+#define LISTEN_PORT           18001    // What TCP port to listen on for connections.  The echo protocol uses port 7.
 
 Adafruit_CC3000_Server echoServer(LISTEN_PORT);
 
@@ -86,7 +86,7 @@ void setup(void)
   Serial.println(F("Listening for connections..."));
 }
 
-void accelerate() {  
+void accelerate() { 
   motor1.run(FORWARD);
   motor2.run(FORWARD);
 }
@@ -120,23 +120,30 @@ void loop(void)
   if (client) {
      // Check if there is data available to read.
      if (client.available() > 0) {
+       Serial.println(F("Client connec..."));
        // Read.
-       bzero(buffer,16);
        int n = client.read(buffer, 15, 1);
        if (n < 0){
-         Serial.println(F("Error data received..."));
+//         Serial.println(F("Error data received..."));
        }
        client.write(buffer,15,1);
-       if (strcmp(buffer,"forward")) {
+       Serial.println(buffer);
+       if (strcmp(buffer,"f") == 0) {
+         Serial.println(F("forward..."));
          accelerate();
-       }else if (strcmp(buffer,"backward")){
+       }else if (strcmp(buffer,"b") == 0){
+         Serial.println(F("backward..."));
          decelerate();
-       }else if (strcmp(buffer,"turnLeft")){
+       }else if (strcmp(buffer,"l") == 0){
+         Serial.println(F("turn left..."));
          turnLeft();
-       }else if (strcmp(buffer,"turnRight")){
+       }else if (strcmp(buffer,"r") == 0){
+         Serial.println(F("turn right..."));
          turnRight();
-       }else{
+       }else if (strcmp(buffer,"s") == 0){
          doStop();
+       }
+       memset(buffer,'\0',sizeof(buffer));
      }
   }
 }

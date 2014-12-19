@@ -2,6 +2,7 @@ import msvcrt
 import time
 import serial
 import logging
+import socket
 
 FORMAT = '%(asctime)-15s %(message)s'
 logging.basicConfig(format=FORMAT)
@@ -20,9 +21,17 @@ def kbfunc():
         ret = False
     return ret
 
+
+hostname = '192.168.43.54'
+
 def main():
-    ser = serial.Serial('COM9', 9600, timeout=5)
-    logger.info(ser.name)
+    # ser = serial.Serial('COM9', 9600, timeout=5)
+    # logger.info(ser.name)
+
+    print 'begin to connect...'
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
+    s.connect((hostname, 7000))
+    print 'connected.'
 
     #infinite loop
     while True:
@@ -33,24 +42,30 @@ def main():
         if x == False:
             time.sleep(0.5)
         elif x.decode() == 'w':
-            print ("Forward.")
-            ser.write("1")
+            print ("forward.")
+            s.send('forward')
+            response = s.recv(1024)
+            print str(response)
         elif x.decode() == 's':
-            print ("Backward.")
-            ser.write("2")
+            print ("backward.")
+            s.send('backward')
+            response = s.recv(1024)
+            print str(response)
         elif x.decode() == 'a':
-            print ("Turn left.")
-            ser.write("3")
+            print ("turnLeft.")
+            s.send('turnLeft')
+            response = s.recv(1024)
+            print str(response)
         elif x.decode() == 'd':
-            print ("Turn right.")
-            ser.write("4")
+            print ("turnRight.")
+            s.send('turnRight')
+            response = s.recv(1024)
+            print str(response)
         elif x.decode() == 'q':
-            print ("Quit.")
-            break;
+            s.send('stop')
+            print ("stop.")
         else:
             time.sleep(0.5)
-
-    ser.close
 
 
 if __name__ == "__main__":
